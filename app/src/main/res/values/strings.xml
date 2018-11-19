@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">flickerimg</string>
+    <string name="placeholder" translatable="false">Plah Plah Plah</string>
+    <string name="test_action1" translatable="false">Test 1</string>
+
+
+    <string name="button_retry">Retry</string>
+    <string name="loading">Loading</string>
+
 </resources>
