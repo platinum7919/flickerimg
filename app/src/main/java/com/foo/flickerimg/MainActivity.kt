@@ -88,7 +88,9 @@ class MainActivity : BaseActivity() {
                     }
 
                     error?.let {
-                        showError(it)
+                        stateLayout.showError(throwable = it, onRetryClicked = View.OnClickListener {
+                            update()
+                        })
                     }
                 }
         )

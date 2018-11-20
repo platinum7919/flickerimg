@@ -27,8 +27,8 @@ fun getContext(): Context {
     return App.instance
 }
 
-fun getStringRes(@StringRes stringRes: Int, vararg args: Any) {
-    getContext().resources.getString(stringRes, *args)
+fun getStringRes(@StringRes stringRes: Int, vararg args: Any) : String {
+    return getContext().resources.getString(stringRes, *args)
 }
 
 
