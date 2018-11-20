@@ -5,15 +5,16 @@
 
 
     <View
-        android:layout_gravity="bottom"
         android:layout_width="match_parent"
         android:layout_height="1dp"
+        android:layout_gravity="bottom"
         android:background="@color/divider" />
 
     <LinearLayout
         android:id="@+id/layout_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/background_transparent_rect"
         android:clickable="true"
         android:orientation="horizontal">
 
@@ -26,8 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginLeft="@dimen/margin_1x"
-            android:layout_marginRight="@dimen/margin_1x"
+            android:layout_margin="@dimen/margin_1x"
             android:orientation="vertical">
 
 

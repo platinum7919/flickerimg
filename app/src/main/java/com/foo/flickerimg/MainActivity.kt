@@ -1,6 +1,7 @@
 package com.foo.flickerimg
 
 import android.content.Context
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.SyncStateContract.Helpers.update
@@ -28,7 +29,7 @@ import com.squareup.picasso.Picasso
 import io.reactivex.disposables.CompositeDisposable
 
 class MainActivity : BaseActivity() {
-
+    val REQUEST_PHOTO_DETAIL = 1
 
     @BindView(R.id.statelayout)
     lateinit var stateLayout: StateLayout
@@ -36,6 +37,9 @@ class MainActivity : BaseActivity() {
     @BindView(R.id.quickreturnlayout)
     lateinit var quickReturnLayout: QuickReturnLayout
 
+
+    @BindView(R.id.textview_footer)
+    lateinit var footerText: TextView
 
     @BindView(R.id.recyclerview)
     lateinit var recyclerView: RecyclerView
@@ -57,10 +61,11 @@ class MainActivity : BaseActivity() {
     private fun createHeaderView(): View? {
         return recyclerView.getAdapterOfType<PhotoAdapter>()?.let { adapter ->
             adapter.getItem(0)?.let { firstItem ->
-                PhotoViewHolder(recyclerView, layoutInflater).apply {
+                adapter.PhotoViewHolder(quickReturnLayout).apply {
                     onBindViewHolder(0, adapter.itemCount, firstItem)
                 }.itemView.apply {
                     this.setBackgroundColor(resources.getColor(R.color.pink))
+
                 }
                 // return the view
             }
@@ -91,53 +96,59 @@ class MainActivity : BaseActivity() {
 
     @MainThread
     private fun update(item: RecentPhotosResponse) {
-        recyclerView.adapter = PhotoAdapter(this).apply {
-            addItems(item.photos?.items ?: listOf())
+        recyclerView.getAdapterOfType<PhotoAdapter>()?.let {
+            quickReturnLayout.hideHeaderView(false)
+            it.replaceItems(item.photos?.items ?: listOf())
+            it.notifyDataSetChanged()
+        } ?: run {
+            recyclerView.adapter = object : PhotoAdapter(this) {
+                override fun showDetail(bindedItem: Photo?) {
+                    bindedItem?.let {
+                        this@MainActivity.showDetail(it)
+                    } ?: run {
+                        Log.w(TAG, "item not binded? No detail")
+                    }
+                }
+            }.apply {
+                addItems(item.photos?.items ?: listOf())
+            }
         }
+
     }
 
     private fun showError(error: Throwable) {
         showToast(error.message)
     }
 
-}
-
-class PhotoViewHolder(parent: ViewGroup, inflater: LayoutInflater) : RecyclerViewHolder<Photo>(inflater.inflate(R.layout.list_item_photo, parent, false)) {
-
-    @BindView(R.id.textview_title)
-    lateinit var titleText: TextView
-
-    @BindView(R.id.textview_subtitle)
-    lateinit var subtitleText: TextView
-
-    @BindView(R.id.imageview_square_thumbnail)
-    lateinit var squareThumbnail: ImageView
-
-
-    init {
-        ButterKnife.bind(this, this.itemView)
+    private fun showDetail(photo: Photo) {
+        startActivityForResult(Intent(this, DetailActivity::class.java).apply {
+            putExtra(EXTRA_PHOTO_JSON, photo.castToString())
+        }, REQUEST_PHOTO_DETAIL)
     }
 
-    override fun onBindViewHolderImpl(position: Int, total: Int, item: Photo) {
-        titleText.setOptionalText(item.title)
-        subtitleText.setOptionalText(item.owner)
 
-
-        item.getUrl(Size.thumbnail)?.let { url ->
-            Picasso.get()
-                    .load(url)
-                    .placeholder(R.drawable.ic_image_grey600_24dp)
-                    .error(R.drawable.ic_alert_circle_outline_white_24dp)
-                    .into(squareThumbnail);
-        } ?: run {
-            squareThumbnail.setImageResource(R.drawable.ic_alert_circle_outline_white_24dp)
+    override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+        super.onActivityResult(requestCode, resultCode, intent)
+        when (requestCode) {
+            REQUEST_PHOTO_DETAIL -> {
+                // maybe check for resultCode == RESULT_OK?? not in the spec though...
+                intent?.getStringExtra(EXTRA_PHOTO_JSON)?.castToObject<Photo>()?.let { photo ->
+                    showFooter(photo)
+                }
+            }
+            else -> {
+                // other request goes here
+            }
         }
+    }
 
+    private fun showFooter(photo: Photo) {
+        footerText.setOptionalText(photo.title)
     }
 }
 
 
-class PhotoAdapter(ctx: Context) : RecyclerViewAdapter<Photo>(ctx) {
+abstract class PhotoAdapter(ctx: Context) : RecyclerViewAdapter<Photo>(ctx) {
     override fun getDataItemId(dataItem: Photo): String {
         return dataItem.id
     }
@@ -147,8 +158,51 @@ class PhotoAdapter(ctx: Context) : RecyclerViewAdapter<Photo>(ctx) {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, p1: Int): RecyclerViewHolder<Photo> {
-        return PhotoViewHolder(parent, inflater)
+        return PhotoViewHolder(parent)
     }
 
+
+    inner class PhotoViewHolder(parent: ViewGroup?) : RecyclerViewHolder<Photo>(inflater.inflate(R.layout.list_item_photo, parent, false)) {
+
+        @BindView(R.id.textview_title)
+        lateinit var titleText: TextView
+
+        @BindView(R.id.textview_subtitle)
+        lateinit var subtitleText: TextView
+
+        @BindView(R.id.imageview_square_thumbnail)
+        lateinit var squareThumbnail: ImageView
+
+        @BindView(R.id.layout_content)
+        lateinit var contentLayout: ViewGroup
+
+
+        init {
+            ButterKnife.bind(this, this.itemView)
+        }
+
+        @OnClick(R.id.layout_content)
+        open fun onContentClicked() {
+            this@PhotoAdapter.showDetail(bindedItem)
+        }
+
+        override fun onBindViewHolderImpl(position: Int, total: Int, item: Photo) {
+            titleText.setOptionalText(item.title)
+            subtitleText.setOptionalText(item.owner)
+
+            item.getUrl(Size.thumbnail)?.let { url ->
+                Picasso.get()
+                        .load(url)
+                        .placeholder(R.drawable.ic_image_grey600_24dp)
+                        .error(R.drawable.ic_alert_circle_outline_white_24dp)
+                        .into(squareThumbnail)
+            } ?: run {
+                squareThumbnail.setImageResource(R.drawable.ic_alert_circle_outline_white_24dp)
+            }
+
+        }
+    }
+
+    abstract fun showDetail(bindedItem: Photo?)
 
 }

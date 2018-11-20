@@ -9,7 +9,11 @@ import com.foo.flickerimg.R
 
 
 /**
- * A layout that helps show a loading [ProgressBar] while its content loads
+ * A layout that can hide or overlay its child to
+ * show a loading [ProgressBar] while its content loads.
+ *
+ * Other "state" can also be implemented such as a message with
+ * a actionable button
  */
 class StateLayout @JvmOverloads constructor(
         context: Context,

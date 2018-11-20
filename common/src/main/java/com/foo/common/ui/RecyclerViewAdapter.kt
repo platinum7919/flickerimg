@@ -34,6 +34,14 @@ abstract class RecyclerViewAdapter<K>(context: Context) : RecyclerView.Adapter<R
         }.size
     }
 
+
+    @Synchronized
+    fun replaceItems(items: List<K>) {
+        itemsArray = ArrayList(items)
+    }
+
+
+
     @Synchronized
     fun getItem(pos: Int): K? {
         return if (pos in 0..(count - 1)) {

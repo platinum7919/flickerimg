@@ -30,6 +30,10 @@ class QuickReturnLayout @JvmOverloads constructor(
 ) : OverlayFrameLayout(context, attrs, defStyleAttr) {
     val TAG = this::class.simpleName
 
+
+    var showing = false
+    var hiding = false
+
     protected var headerView: View? = null
     lateinit var recyclerView: RecyclerView
     lateinit var llm: LinearLayoutManager
@@ -63,9 +67,11 @@ class QuickReturnLayout @JvmOverloads constructor(
      * recyclerView.computeVerticalScrollOffset() = first item px relative to the first
      */
     internal fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+
         val pos = llm.findFirstCompletelyVisibleItemPosition()
+        Log.d(TAG, "[${Thread.currentThread().hashCode()}]onScrolled: $dx,$dy pos=$pos")
         if (pos == 0) {
-            hideHeaderView()
+            hideHeaderView(false)
         } else {
             if (dy > 0) {
                 hideHeaderView()
@@ -76,8 +82,8 @@ class QuickReturnLayout @JvmOverloads constructor(
     }
 
 
-    protected var showing = false
-    protected fun showHeaderView() {
+    fun showHeaderView() {
+
         if (showing) {
             return
         }
@@ -107,8 +113,24 @@ class QuickReturnLayout @JvmOverloads constructor(
         }
     }
 
-    protected var hiding = false
-    protected fun hideHeaderView() {
+
+
+    fun hideHeaderView(animate: Boolean = true) {
+
+        if (!animate) {
+            headerView?.let { view ->
+                view.animation?.let {
+                    view.clearAnimation()
+                }
+                removeView(view)
+                headerView = null
+                hiding = false
+            }
+            return
+        }
+
+
+
         if (hiding) {
             return
         }
