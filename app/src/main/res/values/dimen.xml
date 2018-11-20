@@ -18,6 +18,9 @@
     <!-- http://jeroenmols.com/blog/2016/03/07/resourcenaming/ -->
     <!--    <WHAT>_<WHERE>_<DESCRIPTION>_<SIZE>   <-->
 
+    <dimen name="quick_return_scroll_dy">24dp</dimen>
+
+
     <dimen name="margin_0_5x">5dp</dimen>
     <dimen name="margin_1x">10dp</dimen>
     <dimen name="margin_2x">20dp</dimen>

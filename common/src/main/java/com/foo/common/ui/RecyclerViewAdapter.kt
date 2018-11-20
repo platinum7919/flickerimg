@@ -34,6 +34,15 @@ abstract class RecyclerViewAdapter<K>(context: Context) : RecyclerView.Adapter<R
         }.size
     }
 
+    @Synchronized
+    fun getItem(pos: Int): K? {
+        return if (pos in 0..(count - 1)) {
+            itemsArray[pos]
+        } else {
+            null
+        }
+    }
+
 
     override fun getItemCount(): Int {
         return count
@@ -83,7 +92,7 @@ abstract class RecyclerViewHolder<K> @JvmOverloads constructor(itemView: View) :
     }
 
 
-    internal fun onBindViewHolder(position: Int, total: Int, item: K?) {
+    fun onBindViewHolder(position: Int, total: Int, item: K?) {
         bindedItem = item
         item?.let {
             onBindViewHolderImpl(position, total, it)

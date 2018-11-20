@@ -7,31 +7,30 @@ import android.widget.TextView
 import com.foo.common.utils.isNullOrEmptyOrBlank
 
 /**
- * Remove a child from parent if there is a tag with a certain value in the child
+ * Remove all children from parent if there is a tag with a certain value in the child
  */
-fun ViewGroup.removeChildWithTag(@IdRes tagId: Int, tagValue: Any) {
-    var childern = mutableListOf<View>()
-    if (this.childCount == 0)
-        return
-    for (i in 0 until this.childCount) {
-        childern.add(this.getChildAt(i))
+fun ViewGroup.removeChildWithTag(@IdRes tagId: Int, tagValue: Any): Int {
+    var count = 0
+    findChildrenWithTag(tagId, tagValue).forEach {
+        this.removeView(it)
+        count++
     }
-    childern.forEach { view ->
-        if (view.getTag(tagId)?.equals(tagValue) == true) {
-            this.removeView(view)
-        }
+    return count
+}
+
+fun ViewGroup.findChildrenWithTag(@IdRes tagId: Int, tagValue: Any): List<View> {
+    return getChildren().filter { view ->
+        view.getTag(tagId)?.equals(tagValue) == true
     }
 }
 
 
-/**
- * Get a tag value from a view with a specific type
- */
-fun <O : Any> View.findTag(@IdRes id: Int): O? {
-    this.getTag(id)?.let {
-        return it as? O
+fun ViewGroup.getChildren(): List<View> {
+    return mutableListOf<View>().apply {
+        for (i in 0 until this@getChildren.childCount) {
+            add(this@getChildren.getChildAt(i))
+        }
     }
-    return null;
 }
 
 

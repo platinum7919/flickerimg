@@ -2,4 +2,5 @@
 <resources>
 
     <item name="internal_child_view" type="id"/>
+    <item name="animation_hashcode" type="id"/>
 </resources>

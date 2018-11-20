@@ -14,7 +14,7 @@ fun <A : RecyclerView.Adapter<*>> RecyclerView.getAdapterOfType(): A? {
 /**
  * RecyclerView.VERTICAL or  RecyclerView.HORIZONTAL
  */
-fun RecyclerView.setup(orientation: Int = RecyclerView.VERTICAL, reverseLayout: Boolean = false): RecyclerView.LayoutManager {
+fun RecyclerView.setup(orientation: Int = RecyclerView.VERTICAL, reverseLayout: Boolean = false): LinearLayoutManager {
     return when (orientation) {
         RecyclerView.VERTICAL -> {
             LinearLayoutManager(context, RecyclerView.VERTICAL, reverseLayout)

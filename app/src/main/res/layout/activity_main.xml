@@ -12,12 +12,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerview"
+        <com.foo.flickerimg.views.QuickReturnLayout
+            android:id="@+id/quickreturnlayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent">
 
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
+        </com.foo.flickerimg.views.QuickReturnLayout>
     </com.foo.flickerimg.views.StateLayout>
 
     <!--<LinearLayout-->
