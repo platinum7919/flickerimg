@@ -53,6 +53,7 @@ class MainActivity : BaseActivity() {
         quickReturnLayout.setup(recyclerView) {
             createHeaderView()
         }
+        update()
     }
 
     /**
@@ -72,10 +73,6 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        update()
-    }
 
     @MainThread
     fun update() {

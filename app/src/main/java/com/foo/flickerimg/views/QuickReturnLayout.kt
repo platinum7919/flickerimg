@@ -69,7 +69,7 @@ class QuickReturnLayout @JvmOverloads constructor(
     internal fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
 
         val pos = llm.findFirstCompletelyVisibleItemPosition()
-        Log.d(TAG, "[${Thread.currentThread().hashCode()}]onScrolled: $dx,$dy pos=$pos")
+       // Log.d(TAG, "[${Thread.currentThread().hashCode()}]onScrolled: $dx,$dy pos=$pos")
         if (pos == 0) {
             hideHeaderView(false)
         } else {
