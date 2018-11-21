@@ -5,7 +5,6 @@ import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.RecyclerView.OnScrollListener
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -16,7 +15,9 @@ import java.lang.UnsupportedOperationException
 
 
 /**
- * A lamda that return the headerview
+ * A lamda that return the headerview. Perhaps we can pass in other params here instead of just
+ * [LayoutInflater]? like first fully visible item pos?
+ *
  */
 typealias HeaderViewDelegate = (LayoutInflater) -> View?
 
@@ -69,20 +70,20 @@ class QuickReturnLayout @JvmOverloads constructor(
     internal fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
 
         val pos = llm.findFirstCompletelyVisibleItemPosition()
-       // Log.d(TAG, "[${Thread.currentThread().hashCode()}]onScrolled: $dx,$dy pos=$pos")
+        // Log.d(TAG, "[${Thread.currentThread().hashCode()}]onScrolled: $dx,$dy pos=$pos")
         if (pos == 0) {
-            hideHeaderView(false)
+            hideHeader(false)
         } else {
             if (dy > 0) {
-                hideHeaderView()
+                hideHeader()
             } else if (Math.abs(dy) <= context.resToPx(R.dimen.quick_return_scroll_dy)) {
-                showHeaderView()
+                showHeader()
             }
         }
     }
 
 
-    fun showHeaderView() {
+    fun showHeader() {
 
         if (showing) {
             return
@@ -114,15 +115,14 @@ class QuickReturnLayout @JvmOverloads constructor(
     }
 
 
-
-    fun hideHeaderView(animate: Boolean = true) {
+    fun hideHeader(animate: Boolean = true) {
 
         if (!animate) {
             headerView?.let { view ->
                 view.animation?.let {
                     view.clearAnimation()
                 }
-                removeView(view)
+                removeViewSafely(view)
                 headerView = null
                 hiding = false
             }
@@ -144,11 +144,24 @@ class QuickReturnLayout @JvmOverloads constructor(
             showing = false
             Animations.animate(context, view, R.anim.slide_out_to_top, View.VISIBLE, View.VISIBLE, object : DefaultAnimationListener() {
                 override fun onAnimationEnd(animation: Animation?) {
-                    removeView(view)
+                    removeViewSafely(view)
                     headerView = null
                     hiding = false
                 }
             })
+        }
+    }
+
+    /**
+     * Can't just call [removeView] after the animation end or while scrolling
+     * Because this will trigger an [NullPointerException] durning [android.widget.FrameLayout.layoutChildren]
+     * As the the underlying implementation of [RecyclerView] does not expect view tree to change
+     * during scrolling. So we can simply avoid this by posting a message to queue the action at the
+     * end of the message queue.
+     */
+    private fun removeViewSafely(view: View) {
+        handler.post {
+            removeView(view)
         }
     }
 

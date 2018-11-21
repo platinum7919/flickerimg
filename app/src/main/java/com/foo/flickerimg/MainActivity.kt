@@ -2,14 +2,11 @@ package com.foo.flickerimg
 
 import android.content.Context
 import android.content.Intent
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.SyncStateContract.Helpers.update
 import android.support.annotation.MainThread
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -21,12 +18,10 @@ import com.foo.common.ui.RecyclerViewAdapter
 import com.foo.common.ui.RecyclerViewHolder
 import com.foo.common.ui.getAdapterOfType
 import com.foo.common.ui.setup
-import com.foo.common.utils.firstNotNull
 import com.foo.flickerimg.views.QuickReturnLayout
 import com.foo.flickerimg.views.StateLayout
 import com.foo.flickerimg.views.setOptionalText
 import com.squareup.picasso.Picasso
-import io.reactivex.disposables.CompositeDisposable
 
 class MainActivity : BaseActivity() {
     val REQUEST_PHOTO_DETAIL = 1
@@ -57,16 +52,22 @@ class MainActivity : BaseActivity() {
     }
 
     /**
-     * Reuse the [RecyclerViewHolder] to create the header view
+     * Reuse the [RecyclerViewHolder] to create the header view, since that this what was shown
+     * in the video...
      */
     private fun createHeaderView(): View? {
+
         return recyclerView.getAdapterOfType<PhotoAdapter>()?.let { adapter ->
             adapter.getItem(0)?.let { firstItem ->
                 adapter.PhotoViewHolder(quickReturnLayout).apply {
                     onBindViewHolder(0, adapter.itemCount, firstItem)
+
+                    this.contentLayout.setOnClickListener {
+                        recyclerView.smoothScrollToPosition(0)
+                    }
+
                 }.itemView.apply {
                     this.setBackgroundColor(resources.getColor(R.color.pink))
-
                 }
                 // return the view
             }
@@ -96,7 +97,7 @@ class MainActivity : BaseActivity() {
     @MainThread
     private fun update(item: RecentPhotosResponse) {
         recyclerView.getAdapterOfType<PhotoAdapter>()?.let {
-            quickReturnLayout.hideHeaderView(false)
+            quickReturnLayout.hideHeader(false)
             it.replaceItems(item.photos?.items ?: listOf())
             it.notifyDataSetChanged()
         } ?: run {
@@ -176,12 +177,13 @@ abstract class PhotoAdapter(ctx: Context) : RecyclerViewAdapter<Photo>(ctx) {
         lateinit var contentLayout: ViewGroup
 
 
+
         init {
             ButterKnife.bind(this, this.itemView)
         }
 
         @OnClick(R.id.layout_content)
-        open fun onContentClicked() {
+        fun onContentClicked() {
             this@PhotoAdapter.showDetail(bindedItem)
         }
 

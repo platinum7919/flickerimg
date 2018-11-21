@@ -4,6 +4,8 @@
     <string name="test_action1" translatable="false">Test 1</string>
 
 
+    <string name="text_footer">Title</string>
+
     <string name="button_retry">Retry</string>
     <string name="loading">Loading</string>
 
